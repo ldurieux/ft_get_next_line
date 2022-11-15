@@ -18,22 +18,28 @@ static char	*next_line(char *buffer)
 
 	next = ft_strchr(buffer, '\n');
 	if (next++ == NULL)
-		return (free(buffer), NULL);
+	{
+		free(buffer);
+		return (NULL);
+	}
 	return (ft_memmove(buffer, next, ft_strlen(next) + 1));
 }
 
 static char	*current_line(char *buffer)
 {
 	char	*line;
-	int		i;
+	size_t	i;
 
 	if (!buffer)
 		return (NULL);
 	i = 0;
 	while (buffer[i] && buffer[i] != '\n')
 		i++;
-	i += buffer[i] == '\n';
+	if (buffer[i] == '\n')
+		i++;
 	line = malloc(sizeof(char) * (i + 1));
+	if (!line)
+		return (NULL);
 	ft_memmove(line, buffer, i);
 	line[i] = '\0';
 	return (line);
@@ -43,14 +49,17 @@ static char	*read_file_loop(int fd, char *buffer, size_t cur_size,
 							size_t mem_size)
 {
 	char	*tmp;
-	size_t	bytes_read;
+	ssize_t	bytes_read;
 
 	while (1)
 	{
 		bytes_read = read(fd, buffer + cur_size, BUFFER_SIZE);
 		if (bytes_read < 0)
-			return (free(buffer), NULL);
-		cur_size += bytes_read;
+		{
+			free(buffer);
+			return (NULL);
+		}
+		cur_size += (size_t)bytes_read;
 		buffer[cur_size] = '\0';
 		if (ft_strchr(buffer, '\n') || bytes_read == 0)
 			break ;
@@ -89,18 +98,29 @@ static char	*read_file(int fd, char *res)
 
 char	*get_next_line(int fd)
 {
-	static char	*buffer;
+	static char	buffer[BUFFER_SIZE + 1];
+	char		*tmp_buf;
 	char		*line;
 
 	if (BUFFER_SIZE <= 0 || read(fd, NULL, 0) < 0)
 		return (NULL);
-	if (!ft_strchr(buffer, '\n'))
+	tmp_buf = NULL;
+	if (buffer[0])
 	{
-		buffer = read_file(fd, buffer);
-		if (!buffer || *buffer == '\0')
+		tmp_buf = ft_strdup(buffer);
+		if (!tmp_buf)
 			return (NULL);
 	}
-	line = current_line(buffer);
-	buffer = next_line(buffer);
-	return (line);
+	if (!ft_strchr(buffer, '\n'))
+	{
+		tmp_buf = read_file(fd, tmp_buf);
+		if (!tmp_buf || *tmp_buf == '\0')
+			return (free(tmp_buf), NULL);
+	}
+	line = current_line(tmp_buf);
+	tmp_buf = next_line(tmp_buf);
+	buffer[0] = 0;
+	if (tmp_buf)
+		ft_memmove(buffer, tmp_buf, ft_strlen(tmp_buf) + 1);
+	return (free(tmp_buf), line);
 }

@@ -19,6 +19,7 @@
 
 # include <stdlib.h>
 # include <unistd.h>
+# include <limits.h>
 
 char	*get_next_line(int fd);
 
@@ -26,5 +27,6 @@ void	*ft_realloc(void *ptr, size_t size, size_t new_size);
 char	*ft_strchr(const char *str, int chr);
 size_t	ft_strlen(const char *str);
 void	*ft_memmove(void *dst, const void *src, size_t len);
+char	*ft_strdup(const char *src);
 
 #endif

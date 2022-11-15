@@ -61,7 +61,7 @@ void	*ft_memmove(void *dst, const void *src, size_t len)
 		return (NULL);
 	c_dst = dst;
 	c_src = src;
-	i = -1;
+	i = (size_t)-1;
 	if (dst < src)
 		while (++i < len)
 			c_dst[i] = c_src[i];
@@ -73,4 +73,20 @@ void	*ft_memmove(void *dst, const void *src, size_t len)
 			*c_dst-- = *c_src--;
 	}
 	return (dst);
+}
+
+char	*ft_strdup(const char *src)
+{
+	char	*res;
+	size_t	src_len;
+
+	if (!src)
+		return (NULL);
+	src_len = ft_strlen(src);
+	res = malloc(sizeof(char) * (src_len + 1));
+	if (!res)
+		return (NULL);
+	ft_memmove(res, src, src_len);
+	res[src_len] = '\0';
+	return (res);
 }
